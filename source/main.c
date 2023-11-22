@@ -39,7 +39,6 @@ void initialize_system(){
 int main(){
     initialize_system();
 
-    // TODO: GET SPRITE TO RENDER ON SUB SCREEN. GOOD LUCK !
     SpriteEntry* tuna = &oamMain.oamMemory[0];
     SpriteEntry* tunaSub = &oamSub.oamMemory[0];
     tuna->x = 64;
