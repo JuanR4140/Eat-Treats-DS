@@ -66,7 +66,7 @@ _ADDFILES	:=	-d $(NITRO_FILES)
 #---------------------------------------------------------------------------------
 TARGET		:=	$(shell basename $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	source source/assets/sprites
+SOURCES		:=	source source/assets/sprites source/code/utils
 INCLUDES	:=	include
 DATA		:=	data
 NITRODATA	:=	nitrofiles
