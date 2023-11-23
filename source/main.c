@@ -2,11 +2,13 @@
 #include <nds.h>
 #include <nds/arm9/video.h>
 #include <nds/arm9/background.h>
-#include <nds/arm9/sound.h>
 #include <nds/arm9/sprite.h>
-#include <nds/arm9/console.h>
+#include <nds/arm9/input.h>
+#include <nds/input.h>
 
 #include "assets/sprites/tuna.h"
+#include "assets/sprites/kitten.h"
+
 #include "assets/backgrounds/kitchen_top.h"
 #include "assets/backgrounds/kitchen_bottom.h"
 
@@ -38,10 +40,24 @@ int main(){
     initialize_system();
 
     load_pallete(MAIN, 0, tunaPal);
+    load_pallete(SUB, 0, tunaPal);
+    load_pallete(SUB, 1, kittenPal);
+
+    Sprite* kitten = create_sprite(1, &oamSub, SpriteSize_32x32, SpriteColorFormat_256Color, kittenTiles, kittenTilesLen, 1);
+    kitten->gfx->y = 150;
+
     Sprite* tuna = create_sprite(0, &oamMain, SpriteSize_16x16, SpriteColorFormat_256Color, tunaTiles, tunaTilesLen, 0);
     tuna->gfx->x = 50;
 
+    touchPosition* touch = malloc(sizeof(touchPosition));
+
     for(;;){
+
+        touchRead(touch);
+        if(touch->px != 0 && touch->py != 0){
+            kitten->gfx->x = touch->px;
+        }
+
         swiWaitForVBlank();
 
         bgUpdate();
