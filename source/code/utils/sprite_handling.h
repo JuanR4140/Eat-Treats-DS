@@ -8,6 +8,7 @@
 
 typedef struct Sprite {
     SpriteEntry* gfx;
+    int id;
     u16 x;
     u16 y;
     u8 width;

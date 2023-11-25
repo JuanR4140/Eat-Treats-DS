@@ -13,6 +13,7 @@ Sprite* create_sprite(int id, OamState* oam, SpriteSize size, SpriteColorFormat 
     oamSet(oam, id, 0, 0, 0, pallete_slot, size, color, spriteGFX, -1, false, false, false, false, false);
     sprite->gfx = &oam->oamMemory[id];
     sprite->x = sprite->gfx->x;
+    sprite->id = id;
     sprite->y = sprite->gfx->y;
     sprite->width = 0;
     sprite->height = 0;
