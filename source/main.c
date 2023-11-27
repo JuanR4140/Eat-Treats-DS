@@ -4,6 +4,7 @@
 
 #include <nds.h>
 #include <nds/arm9/video.h>
+#include <nds/arm9/console.h>
 #include <nds/arm9/sound.h>
 #include <nds/arm9/background.h>
 #include <nds/arm9/sprite.h>
@@ -56,7 +57,13 @@ int main(){
     load_pallete(SUB, 0, tunaPal);
     load_pallete(SUB, 1, kittenPal);
 
-    Sprite* kitten = create_sprite(100, &oamSub, SpriteSize_32x32, SpriteColorFormat_256Color, kittenTiles, kittenTilesLen, 1);
+    u16* tunaGFX = load_gfx(&oamMain, SpriteSize_16x16, SpriteColorFormat_256Color, tunaTiles, tunaTilesLen);
+
+    u16* kittenGFX = load_gfx(&oamSub, SpriteSize_32x32, SpriteColorFormat_256Color, kittenTiles, kittenTilesLen);
+    u16* tuna_subGFX = load_gfx(&oamSub, SpriteSize_16x16, SpriteColorFormat_256Color, tunaTiles, tunaTilesLen);
+    u16* dead_tunaGFX = load_gfx(&oamSub, SpriteSize_16x16, SpriteColorFormat_256Color, dead_tunaTiles, dead_tunaTilesLen);
+
+    Sprite* kitten = create_sprite(100, &oamSub, SpriteSize_32x32, SpriteColorFormat_256Color, kittenGFX ,1);
     kitten->gfx->y = 150;
     set_sprite_opts(kitten, 32, 32);
 
@@ -65,7 +72,7 @@ int main(){
     Sprite* spritesSub[MAX_TUNA_SIZE];
 
     for(int i = 0; i < current_tuna_size; i++){
-        spritesMain[i] = create_sprite(i, &oamMain, SpriteSize_16x16, SpriteColorFormat_256Color, tunaTiles, tunaTilesLen, 0);
+        spritesMain[i] = create_sprite(i, &oamMain, SpriteSize_16x16, SpriteColorFormat_256Color, tunaGFX, 0);
         set_sprite_opts(spritesMain[i], 16, 16);
         spritesMain[i]->gfx->x = rand() % 240;
         spritesMain[i]->gfx->y = rand() % 25;
@@ -81,7 +88,7 @@ int main(){
 
     int score = 0;
     int dead_tunas = 0;
-    bool tuna_speed = 1;
+    int tuna_speed = 1;
 
     int level_0 = 0;
     int level_1 = (rand() % 10) + 6 + level_0;
@@ -92,7 +99,11 @@ int main(){
 
     touchPosition* touch = malloc(sizeof(touchPosition));
 
+    consoleInit(0, 0, BgType_Text4bpp, BgSize_T_256x256, 4, 0, false, true);
+
     for(;;){
+        consoleClear();
+        printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nS: %i\nCTS: %i\nTS: %i", score, current_tuna_size, tuna_speed);
 
         touchRead(touch);
         if(touch->px != 0 && touch->py != 0){
@@ -104,7 +115,7 @@ int main(){
                 spritesMain[i]->gfx->y += tuna_speed;
 
                 if(spritesMain[i]->gfx->y > 240){
-                    spritesSub[i] = create_sprite(i, &oamSub, SpriteSize_16x16, SpriteColorFormat_256Color, tunaTiles, tunaTilesLen, 0);
+                    spritesSub[i] = create_sprite(i, &oamSub, SpriteSize_16x16, SpriteColorFormat_256Color, tuna_subGFX, 0);
                     set_sprite_opts(spritesSub[i], 16, 16);
                     spritesSub[i]->gfx->x = spritesMain[i]->gfx->x;
                     spritesSub[i]->gfx->y = rand() % 25;
@@ -113,7 +124,7 @@ int main(){
                     spritesMain[i] = NULL;
                 }
             }else if(spritesSub[i] == NULL){
-                spritesMain[i] = create_sprite(i, &oamMain, SpriteSize_16x16, SpriteColorFormat_256Color, tunaTiles, tunaTilesLen, 0);
+                spritesMain[i] = create_sprite(i, &oamMain, SpriteSize_16x16, SpriteColorFormat_256Color, tunaGFX, 0);
                 spritesMain[i]->gfx->x = rand() % 240;
                 spritesMain[i]->gfx->y = rand() % 25;
             }
@@ -124,17 +135,17 @@ int main(){
                 spritesSub[i]->gfx->y += tuna_speed;
 
                 if(spritesSub[i]->gfx->y > 180){
-                    spritesMain[i] = create_sprite(i, &oamMain, SpriteSize_16x16, SpriteColorFormat_256Color, tunaTiles, tunaTilesLen, 0);
+                    spritesMain[i] = create_sprite(i, &oamMain, SpriteSize_16x16, SpriteColorFormat_256Color, tunaGFX, 0);
                     set_sprite_opts(spritesMain[i], 16, 16);
                     spritesMain[i]->gfx->x = rand() % 240;
                     spritesMain[i]->gfx->y = rand() % 25;
 
-                    Sprite* d = create_sprite(50 + dead_tunas, &oamSub, SpriteSize_16x16, SpriteColorFormat_256Color, dead_tunaTiles, dead_tunaTilesLen, 0);
+                    Sprite* d = create_sprite(50 + dead_tunas, &oamSub, SpriteSize_16x16, SpriteColorFormat_256Color, dead_tunaGFX, 0);
                     d->gfx->x = spritesSub[i]->gfx->x;
                     d->gfx->y = 180;
                     dead_tunas++;
 
-                    if(dead_tunas > 3){
+                    if(dead_tunas > 2){
                         for(;;){
                             swiWaitForVBlank();
                             oamUpdate(&oamMain);
@@ -158,14 +169,13 @@ int main(){
                         current_tuna_size = 2;
                     }else if(score == level_2){
                         current_tuna_size = 3;
-                        tuna_speed = 2;
                     }else if(score == level_3){
                         current_tuna_size = 4;
+                        tuna_speed = 2;
                     }else if(score == level_4){
                         current_tuna_size = 5;
                     }else if(score == level_5){
                         current_tuna_size = 6;
-                        tuna_speed = 3;
                     }
                 }
             }
@@ -173,7 +183,6 @@ int main(){
 
         swiWaitForVBlank();
 
-        bgUpdate();
         oamUpdate(&oamMain);
         oamUpdate(&oamSub);
     }
